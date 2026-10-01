@@ -103,7 +103,7 @@ python -c "import sqlite3; c=sqlite3.connect('data/bot.sqlite3'); [print(r) for 
 ```
 python -m unittest discover -s tests -v
 ```
-32 теста: bot-flow, SQLite, различие источников, безопасность tools, confirmation flow (подтверждение, изменение, отмена), отказ при недоступном ИИ. Настоящий ИИ в тестах не вызывается (ответы модели подменены).
+33 теста: bot-flow, SQLite, различие источников, безопасность tools, confirmation flow (подтверждение, изменение, отмена), отказ при недоступном ИИ. Настоящий ИИ в тестах не вызывается (ответы модели подменены).
 
 ## Запуск на VPS
 

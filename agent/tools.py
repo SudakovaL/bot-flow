@@ -142,7 +142,9 @@ def prepare_lead_draft(service: str = "", contact: str = "", problem_text: str =
                (("service", "услуга"), ("contact", "контакт"), ("problem_text", "описание задачи"))
                if not draft[key]]
     if lacking:
-        draft["missing_info"] = ", ".join(filter(None, [draft["missing_info"], *lacking]))
+        have = draft["missing_info"].lower()
+        draft["missing_info"] = ", ".join(filter(None, [
+            draft["missing_info"], *[x for x in lacking if x.split()[0] not in have]]))
     draft["complete"] = not lacking
     return draft
 

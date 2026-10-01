@@ -171,6 +171,10 @@ class ToolSecurityTests(Base):
         self.assertFalse(d["complete"])
         self.assertIn("неверно", d["missing_info"])
 
+    def test_missing_info_has_no_duplicates(self):
+        d = tools.prepare_lead_draft("Диагностика", "", "не включается", missing_info="контакт (телефон)")
+        self.assertEqual(d["missing_info"].lower().count("контакт"), 1)
+
     def test_regular_lead_rejects_bad_contact(self):
         self.say(action="lead")
         self.say(action="service:0")
