@@ -151,6 +151,11 @@ class ToolSecurityTests(Base):
         self.assertIn("1 рабочий день", tools.search_knowledge("Сколько будет выполняться по времени?"))
         self.assertIn("500", tools.search_knowledge("а подешевле у вас что есть, какие цены"))
 
+    def test_price_question_gets_all_prices(self):
+        found = tools.search_knowledge("от какой суммы начинаются услуги")
+        for price in ("500", "1500", "1200", "800", "3000"):
+            self.assertIn(price, found)
+
     def test_only_safe_tools_for_model(self):
         self.assertEqual(set(tools.LLM_TOOLS),
                          {"search_knowledge", "read_knowledge_file", "prepare_lead_draft"})

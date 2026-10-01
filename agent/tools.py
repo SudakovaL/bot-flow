@@ -53,7 +53,7 @@ _TIME = {"срок", "сроки", "сроко", "срока"}
 _PRICE = {"цена", "цены", "цену", "стоим", "стоит"}
 SYNONYMS = {
     **{k: _TIME for k in ("време", "долго", "быстр", "длитс", "длить", "когда", "выпол", "готов")},
-    **{k: _PRICE for k in ("дорог", "дешев", "оплат", "цены", "цену", "руб", "денег", "прайс")},
+    **{k: _PRICE for k in ("дорог", "дешев", "оплат", "цены", "цену", "рубле", "рубли", "денег", "прайс", "сумма", "суммы", "сумму", "тариф", "плати", "минис", "миним")},
 }
 
 
@@ -64,9 +64,24 @@ def _expand(words: set[str]) -> set[str]:
     return out
 
 
+def services_summary() -> str:
+    """Сводка «услуга: цена; срок» по всем услугам из services.md."""
+    text = (KNOWLEDGE_DIR / "services.md").read_text(encoding="utf-8")
+    lines = []
+    for title, body in sections(text):
+        facts = [ln.lstrip("- ").strip() for ln in body.splitlines()
+                 if ln.lstrip("- ").startswith(("Цена", "Срок"))]
+        lines.append(f"- {title}: " + "; ".join(facts))
+    return "\n".join(lines)
+
+
 def search_knowledge(query: str) -> str:
     """Ищет разделы в knowledge/ по словам запроса."""
-    words = _expand({_stem(w) for w in re.findall(r"\w{3,}", str(query).lower())})
+    raw = {_stem(w) for w in re.findall(r"\w{3,}", str(query).lower())}
+    words = _expand(raw)
+    asks_price_or_time = bool(raw & (_PRICE | _TIME)) or words != raw
+    summary = ("Сводка цен и сроков по всем услугам (из services.md):\n" + services_summary()
+               + "\n\n") if asks_price_or_time else ""
     if not words:
         return "Пустой запрос. Файлы базы знаний: " + ", ".join(list_knowledge_files())
     scored = []
@@ -78,9 +93,9 @@ def search_knowledge(query: str) -> str:
             if score:
                 scored.append((score, name, title, body))
     if not scored:
-        return "Ничего не найдено в базе знаний."
+        return summary or "Ничего не найдено в базе знаний."
     scored.sort(key=lambda x: -x[0])
-    return "\n\n".join(f"[{n}] {t}\n{b}" for _, n, t, b in scored[:4])
+    return summary + "\n\n".join(f"[{n}] {t}\n{b}" for _, n, t, b in scored[:4])
 
 
 def read_knowledge_file(filename: str) -> str:
