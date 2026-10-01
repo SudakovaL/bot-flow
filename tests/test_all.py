@@ -306,6 +306,19 @@ class AIConsultantTests(Base):
         self.assertEqual(len(r["messages"]), 1)
         self.assertEqual(self.rows("leads"), [])
 
+    def test_known_contact_is_hinted_to_model(self):
+        seen = []
+
+        def spy(messages, tools_=None):
+            seen.append(messages[1]["content"])
+            return SimpleNamespace(content="ок", tool_calls=None)
+        with mock.patch.object(ai_client, "chat", spy):
+            self.say(action="ai")
+            self.say(message="не включается")
+            self.say(message="пишите на a.b@mail.ru")
+        self.assertNotIn("уже известен", seen[0])
+        self.assertIn("a.b@mail.ru", seen[1])
+
     def test_ai_failure_falls_back(self):
         with mock.patch.object(ai_client, "chat", side_effect=ai_client.AIUnavailable("x")):
             self.say(action="ai")
