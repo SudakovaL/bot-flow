@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Тихий сервис — чат</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="chat">
+    <header>Мастерская «Тихий сервис»</header>
+    <nav id="menu" aria-label="Главное меню"></nav>
+    <section id="log" aria-live="polite"></section>
+    <div id="buttons"></div>
+    <form id="form" autocomplete="off">
+      <input id="input" type="text" maxlength="1000" placeholder="Напишите сообщение..." aria-label="Сообщение">
+      <button type="submit">Отправить</button>
+    </form>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>
