@@ -155,7 +155,12 @@ def handle_text(s: Session, text: str) -> dict:
         return reply("Как с вами связаться? Напишите телефон, Telegram или email.",
                      [{"label": "Отмена", "action": "menu"}])
     if s.mode == "lead" and s.step == "contact":
-        s.lead["contact"] = text
+        contact = tools.extract_contact(text)
+        if not contact:
+            return reply("Не похоже на контакт. Напишите телефон (например, +7 900 123-45-67), "
+                         "Telegram (@имя) или email (имя@почта.ру).",
+                         [{"label": "Отмена", "action": "menu"}])
+        s.lead["contact"] = contact
         s.step = "confirm"
         lead = s.lead
         summary = (f"Проверьте заявку:\nУслуга: {lead['service']}\n"

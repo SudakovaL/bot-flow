@@ -105,16 +105,39 @@ def read_knowledge_file(filename: str) -> str:
         return f"Отказ: {exc}"
 
 
+_EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+_TG = re.compile(r"(?<![\w@])@[A-Za-z][A-Za-z0-9_]{3,31}\b|t\.me/[A-Za-z][A-Za-z0-9_]{3,31}")
+_PHONE = re.compile(r"(?<![\w.])\+?\d[\d\s\-()]{8,}\d(?!\d)")
+
+
+def extract_contact(text: str) -> str:
+    """Находит в тексте телефон, Telegram (@имя) или email. Нет контакта — пустая строка."""
+    text = str(text or "")
+    m = _EMAIL.search(text)
+    if m:
+        return m.group(0)
+    m = _TG.search(text)
+    if m:
+        return m.group(0)
+    for m in _PHONE.finditer(text):
+        if 10 <= len(re.sub(r"\D", "", m.group(0))) <= 15:
+            return m.group(0).strip()
+    return ""
+
+
 def prepare_lead_draft(service: str = "", contact: str = "", problem_text: str = "",
                        known_info: str = "", missing_info: str = "") -> dict:
     """Только формирует черновик. В базу ничего не пишет."""
     draft = {
         "service": str(service or "").strip()[:200],
-        "contact": str(contact or "").strip()[:200],
+        "contact": extract_contact(contact),
         "problem_text": str(problem_text or "").strip()[:1000],
         "known_info": str(known_info or "").strip()[:500],
         "missing_info": str(missing_info or "").strip()[:500],
     }
+    if str(contact or "").strip() and not draft["contact"]:
+        draft["missing_info"] = ", ".join(filter(None, [
+            draft["missing_info"], "контакт указан неверно (нужен телефон, @telegram или email с @)"]))
     lacking = [label for key, label in
                (("service", "услуга"), ("contact", "контакт"), ("problem_text", "описание задачи"))
                if not draft[key]]

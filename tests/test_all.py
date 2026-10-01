@@ -156,6 +156,31 @@ class ToolSecurityTests(Base):
         for price in ("500", "1500", "1200", "800", "3000"):
             self.assertIn(price, found)
 
+    def test_extract_contact(self):
+        good = {"+7 900 123-45-67": "+7 900 123-45-67", "мой ник @ivan_test": "@ivan_test",
+                "пишите на Mail.Ru: a.b@mail.ru пожалуйста": "a.b@mail.ru", "t.me/ivan_t": "t.me/ivan_t"}
+        for text, expected in good.items():
+            with self.subTest(text=text):
+                self.assertEqual(tools.extract_contact(text), expected)
+        for bad in ["sudakova2ya.ru", "12345", "привет", "@a", "", None, "+7 900"]:
+            with self.subTest(bad=bad):
+                self.assertEqual(tools.extract_contact(bad), "")
+
+    def test_draft_with_bad_contact_is_incomplete(self):
+        d = tools.prepare_lead_draft("Диагностика", "sudakova2ya.ru", "не включается")
+        self.assertFalse(d["complete"])
+        self.assertIn("неверно", d["missing_info"])
+
+    def test_regular_lead_rejects_bad_contact(self):
+        self.say(action="lead")
+        self.say(action="service:0")
+        self.say(message="не включается")
+        r = self.say(message="sudakova2ya.ru")
+        self.assertIn("Не похоже на контакт", r["messages"][0])
+        self.assertNotIn("Отправить заявку", [b["label"] for b in r["buttons"]])
+        r = self.say(message="sudakova@ya.ru")
+        self.assertIn("Контакт: sudakova@ya.ru", r["messages"][0])
+
     def test_only_safe_tools_for_model(self):
         self.assertEqual(set(tools.LLM_TOOLS),
                          {"search_knowledge", "read_knowledge_file", "prepare_lead_draft"})
