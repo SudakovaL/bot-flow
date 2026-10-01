@@ -44,6 +44,17 @@ Linux/macOS: `source .venv/bin/activate`, `cp .env.example .env`.
 
 Откройте http://127.0.0.1:8000. База `data/bot.sqlite3` создаётся сама при старте. Повторный запуск данные не стирает.
 
+## База данных (SQLite)
+
+Файл `data/bot.sqlite3`. **Инициализация автоматическая:** при каждом старте `db.init_db()` создаёт таблицы, если их нет (`CREATE TABLE IF NOT EXISTS`), и не трогает существующие данные. Руками ничего создавать не нужно.
+
+| Таблица | Поля |
+|---|---|
+| `leads` | `session_id`, `source` (`bot_flow` или `ai_consultant`), `service`, `contact`, `problem_text`, `agent_summary`, `missing_info`, `status` (`new`), `created_at` |
+| `feedback` | `session_id`, `message_text`, `created_at` |
+
+Обычная заявка, заявка от ИИ и отзыв различаются: заявки отличаются полем `source`, отзывы лежат в отдельной таблице.
+
 ## Настройка ИИ (файл `.env`)
 
 ```
