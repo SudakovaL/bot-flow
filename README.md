@@ -25,7 +25,7 @@ agent/tools.py    tools; agent/soul.md — инструкции консульт
 knowledge/        база знаний: services.md, faq.md, rules.md
 static/           index.html, style.css, app.js
 tests/            unittest
-evidence/screenshots/  сюда кладутся скриншоты
+evidence/screenshots/  скриншоты работы (01–05)
 ```
 
 ## Запуск локально
@@ -117,7 +117,7 @@ sudo apt-get update && sudo apt-get install -y python3.13 python3.13-venv
 
 **1. Получить проект** — любым из способов:
 ```
-git clone <адрес репозитория> bot-flow                       # через git
+git clone https://github.com/SudakovaL/bot-flow.git        # через git (папка bot-flow)
 tar -czf botflow.tgz --exclude=.venv --exclude=.env --exclude=data/bot.sqlite3 .   # или с компьютера:
 scp botflow.tgz vps:/tmp/ && ssh vps "mkdir -p ~/bot-flow && tar -xzf /tmp/botflow.tgz -C ~/bot-flow"
 ```
@@ -138,7 +138,9 @@ pkill -f "python app.py"                             # остановка
 
 По умолчанию сервер слушает только `127.0.0.1`. Открыть чат с вашего компьютера можно через SSH-туннель: `ssh -L 8000:127.0.0.1:8000 vps`, затем http://127.0.0.1:8000. Если вы открываете порт наружу (`HOST=0.0.0.0`), помните, что у бота нет авторизации.
 
-## Скриншоты (`evidence/screenshots/`) — делаются вручную
+## Скриншоты (`evidence/screenshots/`)
+
+Все пять кадров лежат в папке. Контакты на них тестовые.
 
 | Файл | Что должно быть видно |
 |---|---|
@@ -147,3 +149,12 @@ pkill -f "python app.py"                             # остановка
 | `03-local-ai-consultant.png` | ответ ИИ по базе знаний и черновик с тремя кнопками |
 | `04-local-database-proof.png` | вывод запроса к SQLite: строки `bot_flow`, `ai_consultant` и отдельно `feedback` |
 | `05-vps-runtime-start.png` | запуск на VPS и ответ `/api/health` |
+
+## Известные ограничения
+
+- **Сессии и черновики хранятся в памяти процесса.** После перезапуска бота незавершённые диалоги и неотправленные черновики пропадают. Сохранённые заявки и отзывы остаются в SQLite.
+- **Нет авторизации и админ-панели** (так и задумано для MVP). Заявки смотрят через SQLite (команда выше).
+- **ИИ — лёгкая модель** (`yandexgpt-lite`). Она безопасна и опирается на `knowledge/`, но иногда переспрашивает уже известное или повторно здоровается. Модель меняется только в `.env`.
+- **Контакт проверяется по формату:** телефон (10–15 цифр), `@telegram` или email с `@`. Достоверность не проверяется.
+- **База знаний учебная.** Цены, сроки и скидки в `knowledge/` придуманы для примера. Информации о гарантии в ней нет намеренно: так проверяется, что ИИ не выдумывает.
+
