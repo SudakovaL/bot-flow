@@ -48,9 +48,25 @@ def _stem(word: str) -> str:
     return word[:5]
 
 
+# Слова пользователя -> слова, которые реально встречаются в базе знаний.
+_TIME = {"срок", "сроки", "сроко", "срока"}
+_PRICE = {"цена", "цены", "цену", "стоим", "стоит"}
+SYNONYMS = {
+    **{k: _TIME for k in ("време", "долго", "быстр", "длитс", "длить", "когда", "выпол", "готов")},
+    **{k: _PRICE for k in ("дорог", "дешев", "оплат", "цены", "цену", "руб", "денег", "прайс")},
+}
+
+
+def _expand(words: set[str]) -> set[str]:
+    out = set(words)
+    for w in words:
+        out |= SYNONYMS.get(w, set())
+    return out
+
+
 def search_knowledge(query: str) -> str:
     """Ищет разделы в knowledge/ по словам запроса."""
-    words = {_stem(w) for w in re.findall(r"\w{3,}", str(query).lower())}
+    words = _expand({_stem(w) for w in re.findall(r"\w{3,}", str(query).lower())})
     if not words:
         return "Пустой запрос. Файлы базы знаний: " + ", ".join(list_knowledge_files())
     scored = []

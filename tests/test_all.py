@@ -147,6 +147,10 @@ class ToolSecurityTests(Base):
         self.assertIn("500", tools.search_knowledge("сколько стоит диагностика"))
         self.assertIn("Ничего не найдено", tools.search_knowledge("квантовый космос"))
 
+    def test_search_understands_synonyms(self):
+        self.assertIn("1 рабочий день", tools.search_knowledge("Сколько будет выполняться по времени?"))
+        self.assertIn("500", tools.search_knowledge("а подешевле у вас что есть, какие цены"))
+
     def test_only_safe_tools_for_model(self):
         self.assertEqual(set(tools.LLM_TOOLS),
                          {"search_knowledge", "read_knowledge_file", "prepare_lead_draft"})
